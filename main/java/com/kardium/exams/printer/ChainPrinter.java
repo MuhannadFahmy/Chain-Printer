@@ -2,6 +2,9 @@ package com.kardium.exams.printer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 /*
  * Copyright Kardium Inc. 2023.
@@ -14,6 +17,8 @@ import java.util.Arrays;
 public class ChainPrinter implements Printer {
     private final ChainPrinterDriver driver;
 
+
+    
     public ChainPrinter(ChainPrinterDriver driver) {
         this.driver = driver;
     }
@@ -89,17 +94,13 @@ public class ChainPrinter implements Printer {
         // Getting unsupported character locations
         int[] locations = debugCheckInput(line);
         char[] debugInputChar = checkInput(line);
-        
-        System.out.println(Arrays.toString(locations));
 
         // create first array with 1
         for (int index : locations) {
             debugInputChar[index] = '1';  
         }
 
-        System.out.println('"'+String.copyValueOf(debugInputChar)+'"');
-
-        // this.println(String.copyValueOf(perfectInputChar));
+        this.println(String.copyValueOf(debugInputChar));
 
         // create second array with 0
         for (int i = 0; i < debugInputChar.length; i++){
@@ -110,17 +111,77 @@ public class ChainPrinter implements Printer {
             debugInputChar[index] = '0';  
         }
 
-        System.out.println('"'+String.copyValueOf(debugInputChar)+'"');
-        // this.println(String.copyValueOf(debugInputChar));
+        this.println(String.copyValueOf(debugInputChar));
     }
 
     @Override
     public void pprintln(String line) {
-        // REPLACE THIS WITH YOUR CODE
-        println(line);
+        
+
+        // Solnoid array could be implemented in many ways
+
+        // Chain, implement a fifo using linkedlist
+        LinkedList<String> chain10 = new LinkedList<String>();
+
+
+        // Intializing the chain values
+        Collections.addAll(chain10, " ", "0", " ",  " ", " ", "1",  " ", " ", " ",  "0", " ", " ",  " ", "1", " ",  " ", " ", "0",  " ", " ", " ",  "1", " ", " ");
+
+        //
+        System.out.println(chain10);
+    
+        // linkedlist, remove from the front
+        // linkedlist add to the end
+
+        char[] porInputChar = checkInput(line);
+
+        ArrayList<String> charArray = new ArrayList<>();
+        
+        charArray.add(" ");
+        charArray.add(String.valueOf(porInputChar[0]));
+
+        if (porInputChar.length > 1) {
+            for (int i = 1; i < porInputChar.length; i++) {
+                if (porInputChar[i-1] == '1' && porInputChar[i] == '1') {
+                    charArray.add(" ");
+                    charArray.add(String.valueOf(porInputChar[i]));
+                } else {
+                    charArray.add(" ");
+                    charArray.add(" ");
+                    charArray.add(String.valueOf(porInputChar[i]));
+                }
+            }
+        }
+
+        System.out.println(charArray);
+
+        // you are restriced by the size of the char array
+        Iterator it = chain10.iterator();
+
+        int actuation = 0;
+        final char[] letters = {'0','1'};
+        final int maxActuation = countNumberOfActuation(porInputChar, letters);
+        int solenoidIndex;
+        
+        while (actuation < maxActuation) {
+            int index = 0;
+            while (index < charArray.size()) {
+                String nextChainValue = (String) it.next();
+                if (nextChainValue != " " && nextChainValue.equals(charArray.get(index))) {
+                    solenoidIndex = (index / 3);
+                    driver.fire(solenoidIndex);
+                    charArray.set(index, "X");
+                    actuation++;
+                }
+                index++;
+            }
+            System.out.println("Char Array"+ charArray);
+            System.out.println("Chain  10:"+ chain10);
+            chain10.add(chain10.poll());
+            driver.step();
+            it = chain10.iterator();
+        }
     }
-
-
 
 
     private int[] debugCheckInput(String input) {
@@ -159,7 +220,6 @@ public class ChainPrinter implements Printer {
         return inputChars;  
     }
 
-
     // Count needed accuations 
     private int countNumberOfActuation(char[] input, char[] letters) {
         int letterActuation = 0;
@@ -175,10 +235,13 @@ public class ChainPrinter implements Printer {
 
     public static void main(String[] args) {
         Printer printer = new ChainPrinter(new LoggingChainPrinterDriver());
-        printer.println("01100101");
+        // printer.println("01100101");
         // printer.dprintln("0s11a444fkjhsgew");
 
         // printer.dprintln("013 4 110");
+        printer.pprintln("11111111");
+        // printer.pprintln("01110110");
+
     }
 
 }
